@@ -62,6 +62,8 @@ public class CurrencyServiceImp implements CurrencyService {
             }
         }
         catch (Exception e) {
+            System.out.println(e.toString() + "\nUsing static data");
+
             ObjectMapper mapper = new ObjectMapper();
 
             Currency[] staticData = mapper.readValue(
