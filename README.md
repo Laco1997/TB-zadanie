@@ -1,8 +1,3 @@
-# Read Me First
-The following was discovered as part of building this project:
-
-* The original package name 'com.laco.vub-zadanie' is invalid and this project uses 'com.laco.tbzadanie' instead.
-
 # Getting Started
 
 ### Reference Documentation
