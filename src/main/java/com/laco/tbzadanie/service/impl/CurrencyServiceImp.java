@@ -1,5 +1,7 @@
 package com.laco.tbzadanie.service.impl;
 
+import aj.org.objectweb.asm.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.laco.tbzadanie.model.APICurrency;
 import com.laco.tbzadanie.persistence.entity.Currency;
 import com.laco.tbzadanie.persistence.repository.CurrencyRepository;
@@ -13,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -37,40 +41,41 @@ public class CurrencyServiceImp implements CurrencyService {
     }
 
     @PostConstruct
-    public void createDefaultCurrency() {
+    public void createDefaultCurrency() throws IOException {
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-RapidAPI-Key", apiKey);
         headers.set("X-RapidAPI-Host", apiHost);
 
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
-        ResponseEntity<APICurrency> response = restTemplate.exchange(
-                apiUri, HttpMethod.GET, requestEntity, APICurrency.class);
+        try {
+            ResponseEntity<APICurrency> response = restTemplate.exchange(
+                    apiUri, HttpMethod.GET, requestEntity, APICurrency.class);
 
-        APICurrency apiCurrency = response.getBody();
+            APICurrency apiCurrency = response.getBody();
 
-        for(Map.Entry<String, Double> entry : apiCurrency.getRates().entrySet()){
-            Currency currency = new Currency();
-            currency.setCode(entry.getKey());
-            currency.setPrice(entry.getValue());
-            currencyRepository.save(currency);
+            for (Map.Entry<String, Double> entry : apiCurrency.getRates().entrySet()) {
+                Currency currency = new Currency();
+                currency.setCode(entry.getKey());
+                currency.setPrice(entry.getValue());
+                currencyRepository.save(currency);
+            }
         }
+        catch (Exception e) {
+            ObjectMapper mapper = new ObjectMapper();
 
-//        TODO IN CASE OF API FAILURE
-//        Currency currency1 = new Currency(
-//                "Australia",
-//                "AUD",
-//                1.7308
-//        );
-//
-//        Currency currency2 = new Currency(
-//                "Canada",
-//                "CAD",
-//                1.5091
-//        );
-//
-//        currencyRepository.save(currency1);
-//        currencyRepository.save(currency2);
+            Currency[] staticData = mapper.readValue(
+                    new File("src/main/resources/data/data.json"),
+                    Currency[].class
+            );
+
+            for(Currency item : staticData) {
+                Currency currency = new Currency();
+                currency.setCode(item.getCode());
+                currency.setPrice(item.getPrice());
+                currencyRepository.save(currency);
+            }
+        }
     }
 
     @Override
