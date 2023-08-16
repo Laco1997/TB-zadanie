@@ -1,12 +1,12 @@
 package com.laco.tbzadanie.service.impl;
 
-import aj.org.objectweb.asm.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.laco.tbzadanie.model.APICurrency;
 import com.laco.tbzadanie.persistence.entity.Currency;
 import com.laco.tbzadanie.persistence.repository.CurrencyRepository;
 import com.laco.tbzadanie.service.CurrencyService;
 import jakarta.annotation.PostConstruct;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -40,19 +40,23 @@ public class CurrencyServiceImp implements CurrencyService {
         this.restTemplate = restTemplate;
     }
 
-    @PostConstruct
-    public void createDefaultCurrency() throws IOException {
+    public APICurrency loadExternalCurrency() {
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-RapidAPI-Key", apiKey);
         headers.set("X-RapidAPI-Host", apiHost);
 
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
-        try {
-            ResponseEntity<APICurrency> response = restTemplate.exchange(
-                    apiUri, HttpMethod.GET, requestEntity, APICurrency.class);
+        ResponseEntity<APICurrency> response = restTemplate.exchange(
+                apiUri, HttpMethod.GET, requestEntity, APICurrency.class);
 
-            APICurrency apiCurrency = response.getBody();
+        return response.getBody();
+    }
+
+    @PostConstruct
+    public void createDefaultCurrency() throws IOException {
+        try {
+            APICurrency apiCurrency = loadExternalCurrency();
 
             for (Map.Entry<String, Double> entry : apiCurrency.getRates().entrySet()) {
                 Currency currency = new Currency();
@@ -85,10 +89,17 @@ public class CurrencyServiceImp implements CurrencyService {
         return currencyRepository.findAll();
     }
 
+    @NotNull
     @Override
-    public Double convertCurrency(String from, double price, String to) {
+    public Double convertCurrency(@NotNull String from, @NotNull double price, @NotNull String to) {
         Currency currencyToConvert = currencyRepository.findCurrenciesByCode(to);
-        double targetPrice = currencyToConvert.getPrice();
-        return price * targetPrice;
+        try {
+            double targetPrice = currencyToConvert.getPrice();
+            return price * targetPrice;
+        }
+        catch(Exception e) {
+            System.out.println(e.toString());
+            return null;
+        }
     }
 }
