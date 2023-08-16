@@ -5,6 +5,7 @@ import com.laco.tbzadanie.persistence.entity.Currency;
 import com.laco.tbzadanie.persistence.repository.CurrencyRepository;
 import com.laco.tbzadanie.service.CurrencyService;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -17,6 +18,14 @@ import java.util.Map;
 
 @Service
 public class CurrencyServiceImp implements CurrencyService {
+    @Value("${API_KEY}")
+    private String apiKey;
+
+    @Value("${API_HOST}")
+    private String apiHost;
+
+    @Value("${API_URI}")
+    private String apiUri;
 
     private final CurrencyRepository currencyRepository;
     private final RestTemplate restTemplate;
@@ -30,15 +39,13 @@ public class CurrencyServiceImp implements CurrencyService {
     @PostConstruct
     public void createDefaultCurrency() {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-RapidAPI-Key", "b841965cfdmsh7e730a08179f009p18cbe6jsn4d4f625e95ad");
-        headers.set("X-RapidAPI-Host", "exchangerate-api.p.rapidapi.com");
+        headers.set("X-RapidAPI-Key", apiKey);
+        headers.set("X-RapidAPI-Host", apiHost);
 
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
-        String apiUrl = "https://exchangerate-api.p.rapidapi.com/rapid/latest/EUR";
-
         ResponseEntity<APICurrency> response = restTemplate.exchange(
-                apiUrl, HttpMethod.GET, requestEntity, APICurrency.class);
+                apiUri, HttpMethod.GET, requestEntity, APICurrency.class);
 
         APICurrency apiCurrency = response.getBody();
 
