@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/")
+@RequestMapping(value = "/currency")
 public class CurrencyController {
 
     private final CurrencyService currencyService;
@@ -19,17 +19,17 @@ public class CurrencyController {
         this.currencyService = currencyService;
     }
 
-    @GetMapping(value = "/currency")
+    @GetMapping()
     @ResponseStatus(HttpStatus.OK)
     public List<Currency> getCurrency() {
         return currencyService.getCurrency();
     }
 
-    @GetMapping(value = "/currency/convert")
+    @GetMapping(value = "/convert")
     @ResponseStatus(HttpStatus.OK)
     public Double convertCurrency(@RequestParam String from,
-                                   @RequestParam double price,
-                                   @RequestParam String to) {
+                                  @RequestParam double price,
+                                  @RequestParam String to) {
         return currencyService.convertCurrency(from, price, to);
     }
 

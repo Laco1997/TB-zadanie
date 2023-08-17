@@ -7,6 +7,7 @@ import com.laco.tbzadanie.persistence.repository.CurrencyRepository;
 import com.laco.tbzadanie.service.CurrencyService;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -34,6 +35,7 @@ public class CurrencyServiceImp implements CurrencyService {
     private final CurrencyRepository currencyRepository;
     private final RestTemplate restTemplate;
 
+    @Autowired
     public CurrencyServiceImp(CurrencyRepository currencyRepository,
                               RestTemplate restTemplate) {
         this.currencyRepository = currencyRepository;
