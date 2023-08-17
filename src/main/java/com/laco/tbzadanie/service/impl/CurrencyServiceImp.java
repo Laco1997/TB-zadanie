@@ -94,8 +94,9 @@ public class CurrencyServiceImp implements CurrencyService {
     @NotNull
     @Override
     public Double convertCurrency(@NotNull String from, @NotNull double price, @NotNull String to) {
-        Currency currencyToConvert = currencyRepository.findCurrenciesByCode(to);
         try {
+            Currency currencyToConvert = currencyRepository.findCurrenciesByCode(to);
+            System.out.println(currencyToConvert);
             double targetPrice = currencyToConvert.getPrice();
             return price * targetPrice;
         }
